@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { TenantModule } from './modules/tenant/tenant.module';
@@ -7,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { ProjectsModule } from './modules/projects/projects.module';
 
 @Module({
   imports: [
@@ -16,6 +22,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     PrismaModule,
     TenantModule,
     AuthModule,
+    ProjectsModule,
   ],
   providers: [
     {
@@ -24,9 +31,9 @@ import { RolesGuard } from './common/guards/roles.guard';
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
-    }
-  ]
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
