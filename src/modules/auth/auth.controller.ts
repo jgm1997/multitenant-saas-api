@@ -11,19 +11,22 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { getTenantContext } from 'src/common/tenant-context';
 import { RefreshDto } from './dto/refresh.dto';
-import { JwtAuthGuard } from 'src/common/guards/auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     const { tenantId } = getTenantContext();
     return this.authService.register(dto, tenantId);
   }
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto) {
@@ -31,6 +34,7 @@ export class AuthController {
     return this.authService.login(dto, tenantId);
   }
 
+  @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() dto: RefreshDto) {

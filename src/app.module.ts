@@ -4,6 +4,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { TenantMiddleware } from './modules/tenant/tenant.middleware';
 import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
   imports: [
@@ -14,6 +17,16 @@ import { AuthModule } from './modules/auth/auth.module';
     TenantModule,
     AuthModule,
   ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    }
+  ]
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
