@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { TenantMiddleware } from './modules/tenant/tenant.middleware';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { TenantMiddleware } from './modules/tenant/tenant.middleware';
     }),
     PrismaModule,
     TenantModule,
+    AuthModule,
   ],
 })
 export class AppModule implements NestModule {
