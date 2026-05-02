@@ -9,12 +9,12 @@ import { Request, Response } from 'express';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: any, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
+    let status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | object = 'Internal server error';
 
     if (exception instanceof HttpException) {
@@ -23,10 +23,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message =
         typeof exceptionResponse === 'string'
           ? exceptionResponse
-          : (exceptionResponse as any).message || exceptionResponse;
+          : ((exceptionResponse as { message?: string | object }).message ??
+            exceptionResponse);
     }
 
-    if (status >= 500) console.error(exception);
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) console.error(exception);
 
     response.status(status).json({
       statusCode: status,

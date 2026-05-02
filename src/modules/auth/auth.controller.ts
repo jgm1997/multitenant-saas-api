@@ -39,8 +39,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refresh(@Body() dto: RefreshDto) {
     const payload = JSON.parse(
-      Buffer.from(dto.refreshToken.split('.')[1] || '', 'base64').toString(),
-    );
+      Buffer.from(dto.refreshToken.split('.')[1] ?? '', 'base64').toString(),
+    ) as { sub: string };
     const { tenantId } = getTenantContext();
     return this.authService.refresh(dto.refreshToken, payload.sub, tenantId);
   }
@@ -48,14 +48,14 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async logout(@CurrentUser() user: any) {
+  async logout(@CurrentUser() user: { id: string }) {
     return this.authService.logout(user.id);
   }
 
   @Post('me')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async me(@CurrentUser() user: any) {
+  me(@CurrentUser() user: Express.User) {
     return user;
   }
 }

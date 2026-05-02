@@ -77,7 +77,7 @@ describe('Projects (e2e)', () => {
       .set('x-tenant-slug', 'e2e-corp')
       .send({ email: 'alice@e2e.com', password: 'password123' })
       .expect(200);
-    aliceToken = aliceRes.body.accessToken;
+    aliceToken = (aliceRes.body as { accessToken: string }).accessToken;
 
     // Login Bob
     const bobRes = await request(app.getHttpServer())
@@ -85,7 +85,7 @@ describe('Projects (e2e)', () => {
       .set('x-tenant-slug', 'e2e-corp')
       .send({ email: 'bob@e2e.com', password: 'password123' })
       .expect(200);
-    bobToken = bobRes.body.accessToken;
+    bobToken = (bobRes.body as { accessToken: string }).accessToken;
   });
 
   // ─── CREATE ────────────────────────────────────────────
@@ -97,9 +97,14 @@ describe('Projects (e2e)', () => {
       .send({ name: 'Project Alpha', description: 'Test project' })
       .expect(201);
 
-    expect(res.body.name).toBe('Project Alpha');
-    expect(res.body.owner.email).toBe('alice@e2e.com');
-    projectId = res.body.id;
+    const project = res.body as {
+      name: string;
+      owner: { email: string };
+      id: string;
+    };
+    expect(project.name).toBe('Project Alpha');
+    expect(project.owner.email).toBe('alice@e2e.com');
+    projectId = project.id;
   });
 
   it('should reject project creation without auth', async () => {
@@ -118,8 +123,9 @@ describe('Projects (e2e)', () => {
       .set('Authorization', `Bearer ${bobToken}`)
       .expect(200);
 
-    expect(res.body.length).toBeGreaterThan(0);
-    expect(res.body[0].name).toBe('Project Alpha');
+    const projects = res.body as { name: string }[];
+    expect(projects.length).toBeGreaterThan(0);
+    expect(projects[0].name).toBe('Project Alpha');
   });
 
   // ─── OWNERSHIP ─────────────────────────────────────────
@@ -140,7 +146,7 @@ describe('Projects (e2e)', () => {
       .send({ name: 'Project Alpha Updated' })
       .expect(200);
 
-    expect(res.body.name).toBe('Project Alpha Updated');
+    expect((res.body as { name: string }).name).toBe('Project Alpha Updated');
   });
 
   // ─── ROLES ─────────────────────────────────────────────
@@ -172,7 +178,7 @@ describe('Projects (e2e)', () => {
       })
       .expect(201);
 
-    const otherToken = otherRes.body.accessToken;
+    const otherToken = (otherRes.body as { accessToken: string }).accessToken;
 
     // Eve should see zero projects — isolation works
     const res = await request(app.getHttpServer())

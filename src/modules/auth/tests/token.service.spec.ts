@@ -48,7 +48,9 @@ describe('TokenService', () => {
     service = module.get<TokenService>(TokenService);
   });
 
-  afterEach(async () => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('generateAccessToken', () => {
     it('should return a signed JWT string', () => {
@@ -98,14 +100,18 @@ describe('TokenService', () => {
       expect(rawToken.length).toBeGreaterThan(10);
 
       // Stored token should be hashed — not equal to raw
-      const storedArg = mockPrisma.refreshToken.create.mock.calls[0][0];
+      const storedArg = mockPrisma.refreshToken.create.mock.calls[0][0] as {
+        data: { token: string };
+      };
       expect(storedArg.data.token).not.toBe(rawToken);
     });
   });
 
   describe('revokeAllUserTokens', () => {
     it('should call updateMany with revokedAt set', async () => {
-      (mockPrisma.refreshToken.updateMany as jest.Mock<any>).mockResolvedValue({ count: 2 });
+      (mockPrisma.refreshToken.updateMany as jest.Mock<any>).mockResolvedValue({
+        count: 2,
+      });
 
       await service.revokeAllUserTokens('user-123');
 
