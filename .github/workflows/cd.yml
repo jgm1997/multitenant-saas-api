@@ -1,13 +1,16 @@
 name: CD
 
 on:
-    push:
-        branches: [ main ] # Only deploy from main
+    workflow_run:
+        workflows: [ "CI" ]
+        types: [ completed ]
+        branches: [ main ]
 
 jobs:
     build-and-push:
         name: Build & Push Image
         runs-on: ubuntu-latest
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
         permissions:
             contents: read

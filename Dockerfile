@@ -1,5 +1,5 @@
 # Stage 1 -> Builder
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npm run build
 RUN npx prisma generate
 
 # Stage 2 -> Prod image
-FROM node:20-alpine as production
+FROM node:24-alpine AS production
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma ./prisma
 
-RUN addgroup -g 1001 -S modejs && adduser -S nestjs -u 1001 -G nodejs
+RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001 -G nodejs
 USER nestjs
 
 EXPOSE 3000

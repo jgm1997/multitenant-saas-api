@@ -1,3 +1,6 @@
+![CI](https://github.com/jgm1997/multitenant-saas-api/actions/workflows/ci.yml/badge.svg)
+![CD](https://github.com/jgm1997/multitenant-saas-api/actions/workflows/cd.yml/badge.svg)
+
 # Multi-tenant SaaS API
 
 A production-grade REST API built with **NestJS**, **PostgreSQL**, and **Prisma** that demonstrates core patterns used in real SaaS applications — multi-tenancy, JWT authentication with refresh token rotation, and role-based access control.
