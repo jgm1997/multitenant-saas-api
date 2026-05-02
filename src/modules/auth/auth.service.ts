@@ -53,7 +53,7 @@ export class AuthService {
 
   async login(dto: LoginDto, tenantId: string) {
     const user = await this.prisma.user.findFirst({
-      where: { email: dto.email },
+      where: { email: dto.email, tenantId },
     });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 

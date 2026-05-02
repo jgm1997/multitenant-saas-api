@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'multitenant-saas-api'
+    static_configs:
+      - targets: ['host.docker.internal:9464']
+        # host.docker.internal = your Mac/Linux host from inside Docker
+        # Change to your service's hostname in production
+    metrics_path: '/metrics'

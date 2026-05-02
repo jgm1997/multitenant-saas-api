@@ -1,0 +1,78 @@
+{
+  "title": "Multitenant SaaS API",
+  "uid": "saas-api-overview",
+  "panels": [
+    {
+      "title": "Request Rate (req/s)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{
+        "expr": "rate(http_requests_total[1m])",
+        "legendFormat": "{{method}} {{path}}"
+      }]
+    },
+    {
+      "title": "Error Rate (%)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{
+        "expr": "rate(http_requests_total{status_code=~'5..'}[1m]) / rate(http_requests_total[1m]) * 100",
+        "legendFormat": "Error %"
+      }]
+    },
+    {
+      "title": "P95 Latency (ms)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m]))",
+        "legendFormat": "p95"
+      }]
+    },
+    {
+      "title": "Request Duration Distribution",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(http_request_duration_ms_bucket[5m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m]))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(http_request_duration_ms_bucket[5m]))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "title": "Operations by Tenant",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [{
+        "expr": "rate(tenant_operations_total[5m])",
+        "legendFormat": "{{tenant}} — {{operation}}"
+      }]
+    },
+    {
+      "title": "Auth Attempts",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "rate(auth_attempts_total{success='true'}[5m])",
+          "legendFormat": "Success — {{tenant}}"
+        },
+        {
+          "expr": "rate(auth_attempts_total{success='false'}[5m])",
+          "legendFormat": "Failed — {{tenant}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" }
+}
