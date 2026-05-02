@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.github
+*.md
+.env
+.env.*
+coverage
+jest.config.*
+*.spec.ts
+*.e2e-spec.ts
+docker-compose*.yml
+.eslintrc*
+.prettierrc*
