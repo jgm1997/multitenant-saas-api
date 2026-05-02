@@ -18,6 +18,7 @@ That's the core challenge of every SaaS product — and this project implements 
 ## Architecture highlights
 
 ### Multi-tenancy via shared schema + Prisma middleware
+
 Every tenant (organization) shares the same database. Isolation is enforced by a **Prisma middleware** that automatically injects `tenantId` into every query, mutation, and delete — making it structurally impossible to leak data across tenants, even if a developer forgets to add a filter.
 
 ```
@@ -40,33 +41,37 @@ Controller / Service   pure business logic — zero auth or tenant code
 ```
 
 ### Opt-out security model
+
 Guards are registered globally via `APP_GUARD`. Every route requires authentication by default. Public routes are explicitly marked with `@Public()`. Forgetting to secure a new route is not possible.
 
 ### JWT + Refresh token rotation
+
 - Access tokens expire in 15 minutes
 - Refresh tokens are stored **hashed** in the database (bcrypt)
 - Every refresh rotates the token — the old one is revoked immediately
 - If a stolen token is detected (reuse of a revoked token), **all sessions for that user are revoked**
 
 ### Role hierarchy
+
 ```
 OWNER > ADMIN > MEMBER
 ```
+
 Roles are evaluated by hierarchy level — an `OWNER` automatically passes any `ADMIN`-required check. No need to whitelist every valid role per route.
 
 ---
 
 ## Tech stack
 
-| Layer | Technology |
-|---|---|
-| Framework | NestJS |
-| Database | PostgreSQL 15 |
-| ORM | Prisma |
-| Auth | JWT (access + refresh) + Passport |
-| Validation | class-validator + class-transformer |
-| Testing | Jest + Supertest |
-| Local infra | Docker Compose |
+| Layer       | Technology                          |
+| ----------- | ----------------------------------- |
+| Framework   | NestJS                              |
+| Database    | PostgreSQL 15                       |
+| ORM         | Prisma                              |
+| Auth        | JWT (access + refresh) + Passport   |
+| Validation  | class-validator + class-transformer |
+| Testing     | Jest + Supertest                    |
+| Local infra | Docker Compose                      |
 
 ---
 
@@ -91,12 +96,14 @@ src/
 ## API reference
 
 ### Tenants (public)
+
 ```
 POST   /api/v1/tenants           Create a new tenant
 GET    /api/v1/tenants/:slug     Get tenant info
 ```
 
 ### Auth (public)
+
 ```
 POST   /api/v1/auth/register     Register a user within a tenant
 POST   /api/v1/auth/login        Login and receive tokens
@@ -106,6 +113,7 @@ POST   /api/v1/auth/me           Get current user
 ```
 
 ### Projects (protected)
+
 ```
 POST   /api/v1/projects          Create project (any role)
 GET    /api/v1/projects          List projects (any role)
@@ -115,6 +123,7 @@ DELETE /api/v1/projects/:id      Delete project (ADMIN+)
 ```
 
 All protected routes require:
+
 - `Authorization: Bearer <access_token>`
 - `x-tenant-slug: <your-tenant-slug>`
 
@@ -123,10 +132,12 @@ All protected routes require:
 ## Getting started
 
 ### Prerequisites
+
 - Node.js 18+
 - Docker and Docker Compose
 
 ### 1. Clone and install
+
 ```bash
 git clone https://github.com/yourusername/multitenant-saas-api
 cd multitenant-saas-api
@@ -134,22 +145,26 @@ npm install
 ```
 
 ### 2. Environment setup
+
 ```bash
 cp .env.example .env
 # Edit .env with your values if needed
 ```
 
 ### 3. Start the database
+
 ```bash
 docker-compose up -d
 ```
 
 ### 4. Run migrations
+
 ```bash
 npx prisma migrate dev
 ```
 
 ### 5. Start the server
+
 ```bash
 npm run start:dev
 # Server running at http://localhost:3000/api/v1
@@ -193,3 +208,5 @@ Service-level filtering depends on every developer remembering to add `where: { 
 ## License
 
 MIT
+
+**Note:** This API is hosted on Render's free tier. The first request after inactivity may take 30–60 seconds to respond while the service cold-starts.
