@@ -37,9 +37,9 @@ export class ResourceOwnerGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<Request>();
     const user = request.user as { id: string; role: Role };
-    const resourceId = request.params['id'];
+    const resourceId = request.params['id'] as string;
 
-    if ([Role.ADMIN, Role.OWNER].includes(user.role)) return true;
+    if (([Role.ADMIN, Role.OWNER] as Role[]).includes(user.role)) return true;
 
     const modelDelegate = (
       this.prisma as unknown as Record<string, ModelDelegate>
