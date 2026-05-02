@@ -8,7 +8,7 @@ export class HealthController {
 
   @Public()
   @Get()
-  async health() {
+  health() {
     return { status: 'ok', timestamp: new Date().toISOString() };
   }
 
@@ -22,7 +22,7 @@ export class HealthController {
         checks: { database: 'ok' },
         timestamp: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch {
       return {
         status: 'not ready',
         checks: { database: 'error' },

@@ -6,6 +6,11 @@ import {
 } from '@nestjs/common';
 import { MetricsService } from '../metrics/metrics.service';
 import { Observable, tap } from 'rxjs';
+import type { Request, Response } from 'express';
+
+interface HttpError {
+  status?: number;
+}
 
 @Injectable()
 export class MetricsInterceptor implements NestInterceptor {
@@ -13,30 +18,32 @@ export class MetricsInterceptor implements NestInterceptor {
 
   intercept(
     context: ExecutionContext,
-    next: CallHandler<any>,
-  ): Observable<any> | Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest();
+    next: CallHandler<unknown>,
+  ): Observable<unknown> | Promise<Observable<unknown>> {
+    const request = context.switchToHttp().getRequest<Request>();
     const startTime = Date.now();
+    const path = this.normalizePath(
+      (request.route as { path?: string } | undefined)?.path ?? request.url,
+    );
 
     return next.handle().pipe(
       tap({
         next: () => {
-          const response = context.switchToHttp().getResponse();
+          const response = context.switchToHttp().getResponse<Response>();
           const duration = Date.now() - startTime;
-
           this.metricsService.recordRequest(
             request.method,
-            this.normalizePath(request.route?.path || request.url),
+            path,
             response.statusCode,
             duration,
           );
         },
-        error: (error) => {
+        error: (error: HttpError) => {
           const duration = Date.now() - startTime;
           this.metricsService.recordRequest(
             request.method,
-            this.normalizePath(request.route?.path || request.url),
-            error.status || 500,
+            path,
+            error.status ?? 500,
             duration,
           );
         },

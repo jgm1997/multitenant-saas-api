@@ -40,8 +40,8 @@ import { TraceLoggerService } from './common/logger/trace-loger.service';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: MetricsInterceptor
-    }
+      useClass: MetricsInterceptor,
+    },
   ],
 })
 export class AppModule implements NestModule {
