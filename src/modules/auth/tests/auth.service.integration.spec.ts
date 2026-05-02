@@ -70,7 +70,9 @@ describe('AuthService (integration)', () => {
     service = module.get<AuthService>(AuthService);
   });
 
-  afterEach(async () => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('register', () => {
     it('should create a user and return tokens', async () => {

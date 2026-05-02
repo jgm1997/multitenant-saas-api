@@ -9,13 +9,13 @@ export class TenantController {
 
   @Public()
   @Post()
-  async create(@Body() dto: CreateTenantDto) {
+  create(@Body() dto: CreateTenantDto) {
     return this.tenantService.create(dto);
   }
 
   @Public()
   @Get(':slug')
-  async findBySlug(@Param('slug') slug: string) {
+  findBySlug(@Param('slug') slug: string) {
     return this.tenantService.findBySlug(slug);
   }
 }

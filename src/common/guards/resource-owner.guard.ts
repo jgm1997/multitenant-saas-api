@@ -8,10 +8,18 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';
+import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 export const RESOURCE_KEY = 'resource';
 export const Resource = (model: string) => SetMetadata(RESOURCE_KEY, model);
+
+type ModelDelegate = {
+  findFirst: (args: {
+    where: { id: string };
+    select: { ownerId: true };
+  }) => Promise<{ ownerId: string } | null>;
+};
 
 @Injectable()
 export class ResourceOwnerGuard implements CanActivate {
@@ -27,13 +35,16 @@ export class ResourceOwnerGuard implements CanActivate {
     ]);
     if (!model) return true;
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
-    const resourceId = request.params.id;
+    const request = context.switchToHttp().getRequest<Request>();
+    const user = request.user as { id: string; role: Role };
+    const resourceId = request.params['id'];
 
     if ([Role.ADMIN, Role.OWNER].includes(user.role)) return true;
 
-    const resource = await (this.prisma as any)[model].findFirst({
+    const modelDelegate = (
+      this.prisma as unknown as Record<string, ModelDelegate>
+    )[model];
+    const resource = await modelDelegate.findFirst({
       where: { id: resourceId },
       select: { ownerId: true },
     });

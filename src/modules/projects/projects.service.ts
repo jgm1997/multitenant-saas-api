@@ -11,7 +11,7 @@ export class ProjectsService {
   async create(dto: CreateProjectDto, ownerId: string) {
     const { tenantId } = getTenantContext();
 
-    return this.prisma.project.create({
+    return await this.prisma.project.create({
       data: {
         name: dto.name,
         description: dto.description,
@@ -23,14 +23,14 @@ export class ProjectsService {
   }
 
   async findAll() {
-    return this.prisma.project.findMany({
+    return await this.prisma.project.findMany({
       select: this.projectSelect(),
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findOne(id: string) {
-    const project = this.prisma.project.findFirst({
+    const project = await this.prisma.project.findFirst({
       where: { id },
       select: this.projectSelect(),
     });
@@ -40,7 +40,7 @@ export class ProjectsService {
 
   async update(id: string, dto: UpdateProjectDto) {
     await this.findOne(id);
-    return this.prisma.project.update({
+    return await this.prisma.project.update({
       where: { id },
       data: dto,
       select: this.projectSelect(),

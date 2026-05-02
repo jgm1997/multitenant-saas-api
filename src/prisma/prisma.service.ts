@@ -2,7 +2,9 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
-import { getTenantContext } from 'src/common/tenant-context';
+import { tenantStorage } from 'src/common/tenant-context';
+
+type PrismaArgs = Record<string, unknown>;
 
 @Injectable()
 export class PrismaService
@@ -16,13 +18,13 @@ export class PrismaService
     const extendedClient = this.$extends({
       query: {
         user: {
-          $allOperations: async ({ operation, args, query }) => {
+          $allOperations: ({ operation, args, query }) => {
             const nextArgs = this.applyTenantScope(operation, args);
             return query(nextArgs);
           },
         },
         project: {
-          $allOperations: async ({ operation, args, query }) => {
+          $allOperations: ({ operation, args, query }) => {
             const nextArgs = this.applyTenantScope(operation, args);
             return query(nextArgs);
           },
@@ -49,43 +51,46 @@ export class PrismaService
     await this.$disconnect();
   }
 
-  private applyTenantScope(operation: string, args: any) {
-    let context;
-    try {
-      context = getTenantContext();
-    } catch {
-      return args;
-    }
+  private applyTenantScope(operation: string, args: PrismaArgs): PrismaArgs {
+    const context = tenantStorage.getStore();
+    if (!context) return args;
 
     const { tenantId } = context;
-    const scopedArgs = args ?? {};
+    const scopedArgs: PrismaArgs = args ?? {};
 
     if (['findUnique', 'findFirst', 'findMany', 'count'].includes(operation)) {
-      scopedArgs.where = { ...scopedArgs.where, tenantId };
+      scopedArgs['where'] = {
+        ...(scopedArgs['where'] as PrismaArgs),
+        tenantId,
+      };
     }
 
     if (operation === 'create') {
-      scopedArgs.data = { ...scopedArgs.data, tenantId };
+      scopedArgs['data'] = { ...(scopedArgs['data'] as PrismaArgs), tenantId };
     }
 
     if (operation === 'createMany') {
-      const rows = Array.isArray(scopedArgs.data)
-        ? scopedArgs.data
-        : scopedArgs.data?.data;
+      const data = scopedArgs['data'];
+      const rows = Array.isArray(data)
+        ? data
+        : (data as PrismaArgs | undefined)?.['data'];
 
       if (Array.isArray(rows)) {
-        const withTenant = rows.map((item: any) => ({ ...item, tenantId }));
-        if (Array.isArray(scopedArgs.data)) {
-          scopedArgs.data = withTenant;
+        const withTenant = (rows as PrismaArgs[]).map((item) => ({
+          ...item,
+          tenantId,
+        }));
+        if (Array.isArray(data)) {
+          scopedArgs['data'] = withTenant;
         } else {
-          scopedArgs.data = { ...scopedArgs.data, data: withTenant };
+          scopedArgs['data'] = { ...(data as PrismaArgs), data: withTenant };
         }
       }
     }
 
     if (['update', 'updateMany', 'delete', 'deleteMany'].includes(operation)) {
-      scopedArgs.where = {
-        ...scopedArgs.where,
+      scopedArgs['where'] = {
+        ...(scopedArgs['where'] as PrismaArgs),
         tenantId,
       };
     }

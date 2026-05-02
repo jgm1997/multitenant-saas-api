@@ -27,7 +27,7 @@ export class TenantService {
     });
   }
 
-  async findBySlug(slug: string) {
+  findBySlug(slug: string) {
     return this.prisma.tenant.findUnique({
       where: { slug },
       select: {
