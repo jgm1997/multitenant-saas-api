@@ -9,9 +9,9 @@ COPY prisma ./prisma/
 RUN npm ci
 
 COPY . .
-RUN npm run build
-
 RUN npx prisma generate
+
+RUN npm run build
 
 # Stage 2 -> Prod image
 FROM node:24-alpine AS production
@@ -30,4 +30,4 @@ USER nestjs
 
 EXPOSE 3000
 
-CMD [ "node", "dist/apps/order-service/main" ]
+CMD [ "node", "dist/main" ]
