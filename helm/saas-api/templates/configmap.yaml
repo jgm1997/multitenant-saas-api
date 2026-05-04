@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "saas-api.fullname" . }}
+  labels: 
+    {{- include "saas-api.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.config.NODE_ENV | quote }}
+  PORT: {{ .Values.config.PORT | quote }}
+  JWT_EXPIRES_IN: {{ .Values.config.JWT_EXPIRES_IN | quote }}
+  JWT_REFRESH_EXPIRES_IN: {{ .Values.config.JWT_REFRESH_EXPIRES_IN | quote }}
