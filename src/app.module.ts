@@ -2,7 +2,6 @@ import {
   MiddlewareConsumer,
   Module,
   NestModule,
-  RequestMethod,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
@@ -16,6 +15,9 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { MetricsModule } from './common/metrics/metrics.module';
 import { MetricsInterceptor } from './common/interceptors/metrics.interceptor';
 import { TraceLoggerService } from './common/logger/trace-loger.service';
+import { HealthModule } from './common/health/health.module';
+import { AuthController } from './modules/auth/auth.controller';
+import { ProjectsController } from './modules/projects/project.controller';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { TraceLoggerService } from './common/logger/trace-loger.service';
     AuthModule,
     ProjectsModule,
     MetricsModule,
+    HealthModule,
   ],
   providers: [
     TraceLoggerService,
@@ -48,7 +51,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(TenantMiddleware)
-      .exclude({ path: 'tenants', method: RequestMethod.POST })
-      .forRoutes('*');
+      .forRoutes(AuthController, ProjectsController);
   }
 }
